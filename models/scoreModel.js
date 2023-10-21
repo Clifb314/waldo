@@ -11,3 +11,4 @@ ScoreSchema.virtual('easyDate').get(function() {
     return this.date.toLocaleDateString()
 })
 
+module.exports = mongoose.model('scoreModel', ScoreSchema)

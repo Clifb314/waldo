@@ -1,4 +1,5 @@
 const Pics = require('../models/picModel')
+const Scores = require('../models/scoreModel')
 const {body, validationResult} = require('express-validator')
 
 function importAll(r) {
@@ -47,6 +48,19 @@ exports.checkAnswer = async function(req, res, next) {
 
     exports.endGame = async function(req, res, next) {
         const {score, name} = req.body.json()
+        const upload = new Scores({
+            name,
+            score,
+        })
+        await upload.save().catch(err => res.status(400).json({err, msg: 'Error inserting into database'}))
 
-        
+        res.status(200).json({msg: 'Success!'})
+    }
+
+    exports.popScore = async function(req, res, next) {
+        const output = await Scores.find({}).sort({score: -1}).limit(10).lean()
+
+        if (output.length < 1) res.status(500).json({msg: 'Database appears empty'})
+
+        res.json({scores: output})
     }
