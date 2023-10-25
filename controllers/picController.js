@@ -41,7 +41,7 @@ exports.checkAnswer = async function(req, res, next) {
 
         const target = await Pics.findById(guess._id).exec()
 
-        if (!target) res.json({err: 'Image not linked to databse'})
+        if (!target) res.json({err: 'Image not linked to database'})
 
         const checkName = target.chars.filter(obj => obj.name === guess.name)
         const name = checkName.pop()
@@ -56,6 +56,8 @@ exports.checkAnswer = async function(req, res, next) {
 
     exports.endGame = async function(req, res, next) {
         const {score, name} = req.body.json()
+        //const notUnique = await Scores.findOne({name}).exec()
+        //if (notUnique) return res.status(400).json({})
         const upload = new Scores({
             name,
             score,
