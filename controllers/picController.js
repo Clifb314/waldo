@@ -1,19 +1,27 @@
 const Pics = require('../models/picModel')
 const Scores = require('../models/scoreModel')
-const {body, validationResult} = require('express-validator')
+//const {body, validationResult} = require('express-validator')
 
-function importAll(r) {
-    return r.keys().map(r);
-  }
+// function importAll(r) {
+//     return r.keys().map(r);
+//   }
   
-const images = importAll(require.context('../images/', false, /\.(png|jpe?g|svg)$/));
-const imgLen = images.length - 1
+// const images = importAll(require.context('../images/', false, /\.(png|jpe?g|svg)$/));
+// const imgLen = images.length - 1
 
-exports.randomPic = function(req, res, next) {
-    const choice = Math.floor(Math.random() * imgLen)
+exports.randomPic = async function(req, res, next) {
+    const images = await Pics.find({}).exec()
+    if (images.length < 1) res.json({err: 'Database appears empty'})
 
-    //will change this to sending a json w/ src: , name: 
-    res.sendFile(images[choice])
+    const choice = images[Math.floor(Math.random() * (images.length - 1))]
+    const path = path.join(__dirname, 'images', choice.fileName)
+    //will change this to sending a json w/ src: , name: ?
+    res.locals.imageID = choice._id
+    res.locals.fileName = choice.fileName
+    res.sendFile(path, {}, function(err) {
+        if (err) next(err)
+        else console.log(`Sent: ${choice.fileName}`)
+    })
 
 }
 
