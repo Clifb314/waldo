@@ -9,15 +9,24 @@ const Scores = require('../models/scoreModel')
 // const images = importAll(require.context('../images/', false, /\.(png|jpe?g|svg)$/));
 // const imgLen = images.length - 1
 
-exports.randomPic = async function(req, res, next) {
-    const images = await Pics.find({}).exec()
+//it'll be easier to randomize on client side so let's serve the picture list first
+//just name and _id
+exports.picList = async function(req, res, next) {
+    const images = await Pics.find({}, {fileName: 1}).exec()
     if (images.length < 1) res.json({err: 'Database appears empty'})
+    else res.json({images})
+}
 
-    const choice = images[Math.floor(Math.random() * (images.length - 1))]
-    const path = path.join(__dirname, 'images', choice.fileName)
+//no longer random. Will return a specific image
+exports.randomPic = async function(req, res, next) {
+    const id = req.params.id
+    const image = await Pics.findById(id)
+    if (!image) res.json({err: 'Image not found'})
+
+    //const choice = images[Math.floor(Math.random() * (images.length - 1))]
+    const path = path.join(__dirname, 'images', image.fileName)
+
     //will change this to sending a json w/ src: , name: ?
-    res.locals.imageID = choice._id
-    res.locals.fileName = choice.fileName
     res.sendFile(path, {}, function(err) {
         if (err) next(err)
         else console.log(`Sent: ${choice.fileName}`)
@@ -27,19 +36,20 @@ exports.randomPic = async function(req, res, next) {
 
 exports.easyOn = async function(req, res, next) {
     const request = req.body.json()
-    const image = await Pics.findById(request.ID)
+    const image = await Pics.findById(request.id)
     if (!image) res.status(500).json({err: 'Image not found'})
+
+    //return all characters in the selected picture
     const output = [...image.answerArr]
 
     return res.json({options: output})
-
 }
 
 exports.checkAnswer = async function(req, res, next) {
 
         const guess = req.body.json()
 
-        const target = await Pics.findById(guess._id).exec()
+        const target = await Pics.findById(guess.id).exec()
 
         if (!target) res.json({err: 'Image not linked to database'})
 
@@ -51,7 +61,7 @@ exports.checkAnswer = async function(req, res, next) {
         else if (name.rangeX.max < guess.x) res.json({result: 0, hint: 'Not there, bit lower...'})
         else if (name.rangeY.min > guess.y) res.json({result: 0, hint: 'Not there, bit to the right...'})
         else if (name.rangeY.max < guess.y) res.json({result: 0, hint: 'Not there, bit to the left...'})
-        else res.json({result: 1, msg: 'Success!'})
+        else res.json({result: 1, msg: 'You got it!'})
     }
 
     exports.endGame = async function(req, res, next) {
