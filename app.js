@@ -3,6 +3,7 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+require('dotenv').config()
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -11,9 +12,9 @@ var app = express();
 
 //mongoose
 const mongoose = require('mongoose')
-const mongoURL = process.env.MONGOURL
+const mongoURL = process.env.MONGODB
 mongoose.connect(mongoURL, {useUnifiedTopology: true, useNewUrlParser: true})
-const db = mongoose.connection()
+const db = mongoose.connection
 db.on('error', console.error.bind(console, 'mongo connection error'))
 
 // view engine setup

@@ -1,5 +1,7 @@
+const { path } = require('../app')
 const Pics = require('../models/picModel')
 const Scores = require('../models/scoreModel')
+const join = require('path').join
 //const {body, validationResult} = require('express-validator')
 
 // function importAll(r) {
@@ -20,14 +22,15 @@ exports.picList = async function(req, res, next) {
 //no longer random. Will return a specific image
 exports.randomPic = async function(req, res, next) {
     const id = req.params.id
-    const image = await Pics.findById(id)
+    const image = await Pics.findById(id).exec()
     if (!image) res.json({err: 'Image not found'})
 
     //const choice = images[Math.floor(Math.random() * (images.length - 1))]
-    const path = path.join(__dirname, 'images', image.fileName)
+    const filePath = join(__dirname,'..', 'images', image.fileName)
+    console.log(filePath)
 
     //will change this to sending a json w/ src: , name: ?
-    res.sendFile(path, {}, function(err) {
+    res.sendFile(filePath, {}, function(err) {
         if (err) next(err)
         else console.log(`Sent: ${choice.fileName}`)
     })
