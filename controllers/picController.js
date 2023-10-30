@@ -1,3 +1,4 @@
+const { default: mongoose } = require('mongoose')
 const { path } = require('../app')
 const Pics = require('../models/picModel')
 const Scores = require('../models/scoreModel')
@@ -22,8 +23,9 @@ exports.picList = async function(req, res, next) {
 //no longer random. Will return a specific image
 exports.randomPic = async function(req, res, next) {
     const id = req.params.id
-    const image = await Pics.findById(id).exec()
-    if (!image) res.json({err: 'Image not found'})
+    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({err: 'invalid objectId'})
+    const image = await Pics.findById(id).exec().catch(err => next(err))
+    if (!image) return res.json({err: 'Image not found'})
 
     //const choice = images[Math.floor(Math.random() * (images.length - 1))]
     const filePath = join(__dirname,'..', 'images', image.fileName)
@@ -38,9 +40,10 @@ exports.randomPic = async function(req, res, next) {
 }
 
 exports.easyOn = async function(req, res, next) {
-    const request = req.body.json()
-    const image = await Pics.findById(request.id)
-    if (!image) res.status(500).json({err: 'Image not found'})
+    console.log(req.body.id)
+    const request = req.body.id
+    const image = await Pics.findById(request).exec()
+    if (!image) return res.status(500).json({err: 'Image not found'})
 
     //return all characters in the selected picture
     const output = [...image.answerArr]
@@ -50,11 +53,11 @@ exports.easyOn = async function(req, res, next) {
 
 exports.checkAnswer = async function(req, res, next) {
 
-        const guess = req.body.json()
+        const guess = req.body
 
         const target = await Pics.findById(guess.id).exec()
 
-        if (!target) res.json({err: 'Image not linked to database'})
+        if (!target) return res.json({err: 'Image not linked to database'})
 
         const checkName = target.chars.filter(obj => obj.name === guess.name)
         const name = checkName.pop()
@@ -68,16 +71,19 @@ exports.checkAnswer = async function(req, res, next) {
     }
 
     exports.endGame = async function(req, res, next) {
-        const {score, name} = req.body.json()
+        const {score, name} = req.body
         //const notUnique = await Scores.findOne({name}).exec()
         //if (notUnique) return res.status(400).json({})
         const upload = new Scores({
             name,
             score,
         })
-        await upload.save().catch(err => res.status(400).json({err, msg: 'Error inserting into database'}))
-
-        res.status(200).json({msg: 'Success!'})
+        try {
+            await upload.save()
+            return res.status(200).json({msg: 'Success!'})
+        } catch(err) {
+            return res.status(400).json({err, msg: 'Error inserting into database'})
+        }
     }
 
     exports.popScore = async function(req, res, next) {

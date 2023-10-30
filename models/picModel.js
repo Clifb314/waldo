@@ -27,7 +27,7 @@ picSchema.virtual('answer').get(function() {
     let x = 0
     const length = character.length - 1
     let output = ''
-    while (x < length - 1) {
+    while (x < length) {
         output += characters[x].name + ', '
         x++
     }
@@ -39,10 +39,10 @@ picSchema.virtual('answer').get(function() {
 picSchema.virtual('answerArr').get(function() {
     let characters = this.chars
     let x = 0
-    const length = character.length - 1
+    const length = characters.length
     let output = []
     while (x < length) {
-        output.push(characters[x])
+        output.push(characters[x].name)
         x++
     }
     return output
