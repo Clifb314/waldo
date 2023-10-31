@@ -5,11 +5,19 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 require('dotenv').config()
 
+//cors options
+const cors = require('cors')
+const corsOpts = {
+  origin: '*',
+  credentials: true,
+  optionSuccessStatus: 200,
+}
+
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
 var app = express();
-
+app.use(cors(corsOpts))
 //mongoose
 const mongoose = require('mongoose')
 const mongoURL = process.env.MONGODB

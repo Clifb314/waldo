@@ -28,27 +28,25 @@ exports.randomPic = async function(req, res, next) {
     if (!image) return res.json({err: 'Image not found'})
 
     //const choice = images[Math.floor(Math.random() * (images.length - 1))]
-    const filePath = join(__dirname,'..', 'images', image.fileName)
-    console.log(filePath)
+    const filePath = join(__dirname,'..', 'images/', image.fileName)
 
     //will change this to sending a json w/ src: , name: ?
     res.sendFile(filePath, {}, function(err) {
         if (err) next(err)
-        else console.log(`Sent: ${choice.fileName}`)
+        else console.log(`Sent: ${image.fileName}`)
     })
 
 }
 
 exports.easyOn = async function(req, res, next) {
-    console.log(req.body.id)
     const request = req.body.id
     const image = await Pics.findById(request).exec()
     if (!image) return res.status(500).json({err: 'Image not found'})
 
     //return all characters in the selected picture
-    const output = [...image.answerArr]
+    const options = [...image.answerArr]
 
-    return res.json({options: output})
+    return res.json({options})
 }
 
 exports.checkAnswer = async function(req, res, next) {
