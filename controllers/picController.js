@@ -39,8 +39,9 @@ exports.randomPic = async function(req, res, next) {
 }
 
 exports.easyOn = async function(req, res, next) {
-    const request = req.body.id
-    const image = await Pics.findById(request).exec()
+    const request = req.body
+    console.log(request)
+    const image = await Pics.findById(request.id).exec()
     if (!image) return res.status(500).json({err: 'Image not found'})
 
     //return all characters in the selected picture
@@ -85,7 +86,7 @@ exports.checkAnswer = async function(req, res, next) {
     }
 
     exports.popScore = async function(req, res, next) {
-        const output = await Scores.find({}).sort({score: -1}).limit(10).lean()
+        const output = await Scores.find({}).sort({score: -1}).limit(10).exec()
 
         if (output.length < 1) res.status(500).json({msg: 'Database appears empty'})
 
