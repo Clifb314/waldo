@@ -60,12 +60,24 @@ exports.checkAnswer = async function(req, res, next) {
 
         const checkName = target.chars.filter(obj => obj.name === guess.name)
         const name = checkName.pop()
-        if (!name) res.json({result: 0, hint: 'This character is not in this image!'})
 
-        if (name.rangeX.min > guess.x) res.json({result: 0, hint: 'Not there, bit higher...'})
-        else if (name.rangeX.max < guess.x) res.json({result: 0, hint: 'Not there, bit lower...'})
-        else if (name.rangeY.min > guess.y) res.json({result: 0, hint: 'Not there, bit to the right...'})
-        else if (name.rangeY.max < guess.y) res.json({result: 0, hint: 'Not there, bit to the left...'})
+        if (!name) return res.json({result: 0, hint: 'This character is not in this image!'})
+
+        function recalc(click, resize, orig) {
+            return (orig / resize) * click
+        }
+
+        const newX = recalc(guess.guess[0], guess.size, target.origX)
+        const newY = recalc(guess.guess[1], guess.size, target.origY)
+
+
+
+
+
+        if (name.rangeX.min > newX) res.json({result: 0, hint: 'Not there, bit higher...'})
+        else if (name.rangeX.max < newX) res.json({result: 0, hint: 'Not there, bit lower...'})
+        else if (name.rangeY.min > newY) res.json({result: 0, hint: 'Not there, bit to the right...'})
+        else if (name.rangeY.max < newY) res.json({result: 0, hint: 'Not there, bit to the left...'})
         else res.json({result: 1, msg: 'You got it!'})
     }
 
