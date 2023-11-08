@@ -13,11 +13,11 @@ const join = require('path').join
 // const imgLen = images.length - 1
 
 //it'll be easier to randomize on client side so let's serve the picture list first
-//just name and _id
+//just name and _id and chars
 exports.picList = async function(req, res, next) {
-    const images = await Pics.find({}, {fileName: 1}).exec()
+    const images = await Pics.find({}, {fileName: 1, 'chars._id': 1}).exec()
     if (images.length < 1) res.json({err: 'Database appears empty'})
-    else res.json({images})
+    else res.json(images)
 }
 
 //no longer random. Will return a specific image
@@ -47,7 +47,7 @@ exports.easyOn = async function(req, res, next) {
     //return all characters in the selected picture
     const options = [...image.answerArr]
 
-    return res.json({options})
+    return res.json(options)
 }
 
 exports.checkAnswer = async function(req, res, next) {
@@ -66,18 +66,14 @@ exports.checkAnswer = async function(req, res, next) {
         function recalc(click, resize, orig) {
             return (orig / resize) * click
         }
+        console.log(guess)
+        const newX = recalc(guess.guess[0], guess.size[0], target.origX)
+        const newY = recalc(guess.guess[1], guess.size[1], target.origY)
 
-        const newX = recalc(guess.guess[0], guess.size, target.origX)
-        const newY = recalc(guess.guess[1], guess.size, target.origY)
-
-
-
-
-
-        if (name.rangeX.min > newX) res.json({result: 0, hint: 'Not there, bit higher...'})
-        else if (name.rangeX.max < newX) res.json({result: 0, hint: 'Not there, bit lower...'})
-        else if (name.rangeY.min > newY) res.json({result: 0, hint: 'Not there, bit to the right...'})
-        else if (name.rangeY.max < newY) res.json({result: 0, hint: 'Not there, bit to the left...'})
+        if (name.rangeX.min > newX) res.json({result: 0, hint: 'Not there, a bit to the right...'})
+        else if (name.rangeX.max < newX) res.json({result: 0, hint: 'Not there, a bit to the left...'})
+        else if (name.rangeY.min > newY) res.json({result: 0, hint: 'Not there, a bit lower...'})
+        else if (name.rangeY.max < newY) res.json({result: 0, hint: 'Not there, a bit higher...'})
         else res.json({result: 1, msg: 'You got it!'})
     }
 
